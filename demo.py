@@ -1,66 +1,87 @@
 import streamlit as st 
-import torch
+import torch as torch
+from st_aggrid import AgGrid
+import pandas as pd
+
 
 def introduction():
-    st.title("House Price Prediction!")
-    st.write("This is a demo of a simple house price prediction model built with PyTorch and Streamlit.")
+    st.title("Please input a PDF Folder")
+    #st.write("Keep calm and wait for you pdf to be generate")
 
 def input_forms():
 
     # Streamlit input fields 
     st.sidebar.header("User Input Features")
-    st.sidebar.markdown("Please fill in the following fields to get a prediction of the house price.")
+    #st.sidebar.markdown("Please fill in the following fields to get a prediction of the house price.")
+    uploaded_files = st.file_uploader('Upload your files',
+    accept_multiple_files=True,type="pdf")
 
-    # Input fields based on ["total_rooms", "population", "households", "median_income"]
+        # Add a submit button
+    if st.button("Submit"):
+        # Perform some action when the user clicks the submit button
+        st.write("You clicked the Submit button!")
 
-    with st.form(key='housing_form'):
-        total_rooms = st.number_input(label="Total Rooms", value=1)
-        population = st.number_input(label="Population", value=1)
-        households = st.number_input(label="Households", value=1)
-        median_income = st.number_input(label="Median Income", value=1)
+    st.write("SUMMARY")
+    df = pd.read_csv('https://raw.githubusercontent.com/fivethirtyeight/data/master/airline-safety/airline-safety.csv')
+    # AgGrid(df)
+    container = st.container()
+    all = st.checkbox("Select all")
 
-        submit_button = st.form_submit_button(label='Submit')
+    if all:
+        selected_options = container.multiselect("Select one or more options:",
+            [value for value in df["airline"]],[value for value in df["airline"]])
+    else:
+        selected_options =  container.multiselect("Select one or more options:",
+        [value for value in df["airline"]])
 
-        if submit_button:
-            # Create a list of inputs
-            inputs = [total_rooms, population, households, median_income]
+    # Use boolean indexing to filter the DataFrame based on the selected options
+    filtered_df = df[df["airline"].isin(selected_options)]
+    AgGrid(filtered_df)
+ 
 
-            # Convert inputs to tensor
-            inputs = torch.tensor(inputs, dtype=torch.float32)
+        # if submit_button:
+        #     # Create a list of inputs
+        #     inputs = [total_rooms, population, households, median_income]
 
-            # Return input tensors
-            return inputs
+        #     # Convert inputs to tensor
+        #     inputs = torch.tensor(inputs, dtype=torch.float32)
+
+        #     # Return input tensors
+        #     return inputs
 
 
-def display_predictions(inputs):
-    # Make predictions
-    predictions = predict(inputs)
+# def display_predictions(inputs):
+#     # Make predictions
+#     predictions = predict(inputs)
 
-    # Display predictions
-    st.subheader("Predicted house price!")
-    st.write(f"USD ${predictions:.2f}")
+#     # Display predictions
+#     st.subheader("Predicted house price!")
+#     st.write(f"USD ${predictions:.2f}")
 
-def predict(inputs):
-    # Import local module 
-    from learning_resources.model import RegressionModel
+# def predict(inputs):
+#     # Import local module 
+#     from learning_resources.model import RegressionModel
 
-    # Because we only trained for 4 inputs
-    model = RegressionModel(input_dim=4, output_dim=1)
-    state = torch.load("learning_resources/models/housing_price.pt") 
-    model.load_state_dict(state_dict=state)
+#     # Because we only trained for 4 inputs
+#     model = RegressionModel(input_dim=4, output_dim=1)
+#     state = torch.load("learning_resources/models/housing_price.pt") 
+#     model.load_state_dict(state_dict=state)
 
-    # Make predictions 
-    predictions = model(inputs)
+#     # Make predictions 
+#     predictions = model(inputs)
 
-    # Get value from tensor
-    predictions = predictions.item() 
+#     # Get value from tensor
+#     predictions = predictions.item() 
 
-    return predictions * 1000
+#     return predictions * 1000
+
+
 
 
 if __name__ == "__main__":
     introduction() 
     inputs = input_forms()
+    
 
-    if inputs is not None:
-        display_predictions(inputs)
+    # if inputs is not None:
+    #     display_predictions(inputs)
