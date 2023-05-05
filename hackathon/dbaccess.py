@@ -29,5 +29,5 @@ if __name__ == "__main__":
 
     # insert_table("123", "2", "123", "123", "123", "123", "123", "123", "123", "123")
 
-    print(get_table().json())
+    print(get_table())
 
