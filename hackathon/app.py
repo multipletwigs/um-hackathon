@@ -48,18 +48,6 @@ def display_parsed_pdfs(parsed_pdfs):
 
 def display_parsed_pdfs(df):
     if df is not None:
-        # Filter the dataframe based on the columns 
-        container = st.container()
-        all = st.checkbox("Select all")
-        if all:
-            selected_options = container.multiselect("Select one or more options:",
-                [value for value in df[1]],[value for value in df[1]])
-        else:
-            selected_options =  container.multiselect("Select one or more options:",
-            [value for value in df[1]])
-
-        selected_columns = [column for column in columns if column in selected_options]
-        df = df[selected_columns]
         st.table(df)
 
 def dropdown_pdf(parsed_pdfs):
@@ -87,5 +75,4 @@ if __name__ == "__main__":
     st.set_page_config(layout="wide")
     introduction() 
     parsed_pdfs = asyncio.run(upload_form())
-    if parsed_pdfs is not None:
-        display_parsed_pdfs(parsed_pdfs)
+    display_parsed_pdfs(parsed_pdfs)
