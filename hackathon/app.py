@@ -4,7 +4,7 @@ from st_aggrid import AgGrid
 import pandas as pd
 import io
 import asyncio 
-import memo
+
 from parser import Parser
 from st_aggrid import AgGrid
 
@@ -13,7 +13,6 @@ def introduction():
     st.title("Upload PDF Pitch Decks")
 
 async def parse_pdf(uploaded_file):
-    print(uploaded_file)
     file_bytes = uploaded_file.getvalue()
     parser = Parser(io.BytesIO(file_bytes))
     with st.spinner("Parsing PDF..."):
@@ -32,19 +31,10 @@ async def upload_form():
 
     # if submit button is clicked 
     if st.button("Submit"):
-        # Parse the pdfs
+        # Parse the pdfs in async 
         parsed_pdfs = await asyncio.gather(*[parse_pdf(file) for file in uploaded_files])
         temp = parsed_pdfs 
         return pd.concat(parsed_pdfs, ignore_index=True)
-
-def display_parsed_pdfs(parsed_pdfs):
-    # Display the parsed pdfs
-    df = None 
-    for parsed_pdf in parsed_pdfs:
-        if df is None:
-            df = pd.DataFrame(parsed_pdf)
-        else:
-            df = df.append(parsed_pdf, ignore_index=True)
 
 def display_parsed_pdfs(df):
     if df is not None:
@@ -64,15 +54,22 @@ def generate_memo(pdf):
     st.text(body=f"PDF: {pdf}")
     
     generator = memo.MemoGenerator()
-    memo = generator.generate_memo(pdf) 
-    for char in memo:
-        text += char
-        st.text(body=text)
 
-
+    if st.button("Generate Memo"):
+        memo = generator.generate_memo(pdf) 
+        for char in memo:
+            text += char
+            st.text(body=text)
 
 if __name__ == "__main__":
     st.set_page_config(layout="wide")
     introduction() 
     parsed_pdfs = asyncio.run(upload_form())
-    display_parsed_pdfs(parsed_pdfs)
+    if 'parsed_pdfs' not in st.session_state and parsed_pdfs is not None:
+        st.session_state['parsed_pdfs'] = parsed_pdfs 
+    display_parsed_pdfs(st.session_state.get('parsed_pdfs'))
+
+    # Export the parsed pdfs to csv for download
+    if 'parsed_pdfs' in st.session_state:
+        st.download_button("Download CSV", data=st.session_state.get('parsed_pdfs').to_csv(), file_name="parsed_pdfs.csv", mime="text/csv")
+        
