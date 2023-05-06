@@ -32,7 +32,7 @@ async def upload_form():
 
     # if submit button is clicked 
     if st.button("Submit"):
-        # Parse the pdfs
+        # Parse the pdfs in async 
         parsed_pdfs = await asyncio.gather(*[parse_pdf(file) for file in uploaded_files])
         temp = parsed_pdfs 
         return pd.concat(parsed_pdfs, ignore_index=True)
