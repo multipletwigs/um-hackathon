@@ -2,14 +2,15 @@ import pypdf
 from PyPDF2 import PdfReader
 import os 
 import openai
-import environment
 import json
+import streamlit as st
 import pandas as pd
 
 class Parser: 
   
   def __init__(self, filebytes): 
     self.file_bytes = filebytes
+    self.OPENAI_API = os.environ['OPENAI_API'] if os.environ['OPENAI_API'] else st.secrets['OPENAI_API']
 
   def _parse(self):
     # Parse all text content from the pdf file by page
@@ -39,7 +40,7 @@ class Parser:
 
     # Compile the content based on criteria with open ai 
     try:
-      openai.api_key = os.environ['OPENAI_API']
+      openai.api_key = self.OPENAI_API
       body = {
         "role": "user",
         "content": f"Generate a summary of the pitch deck document based on the following criterias: {criterias}. The content of the document is as follows: {content}. \nPlease generate the text in the following format. <Criteria> | <Summary> \n" 

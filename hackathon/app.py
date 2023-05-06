@@ -4,7 +4,7 @@ from st_aggrid import AgGrid
 import pandas as pd
 import io
 import asyncio 
-import memo
+
 from parser import Parser
 from st_aggrid import AgGrid
 
@@ -13,7 +13,6 @@ def introduction():
     st.title("Upload PDF Pitch Decks")
 
 async def parse_pdf(uploaded_file):
-    print(uploaded_file)
     file_bytes = uploaded_file.getvalue()
     parser = Parser(io.BytesIO(file_bytes))
     with st.spinner("Parsing PDF..."):
