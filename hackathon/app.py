@@ -37,15 +37,6 @@ async def upload_form():
         temp = parsed_pdfs 
         return pd.concat(parsed_pdfs, ignore_index=True)
 
-def display_parsed_pdfs(parsed_pdfs):
-    # Display the parsed pdfs
-    df = None 
-    for parsed_pdf in parsed_pdfs:
-        if df is None:
-            df = pd.DataFrame(parsed_pdf)
-        else:
-            df = df.append(parsed_pdf, ignore_index=True)
-
 def display_parsed_pdfs(df):
     if df is not None:
         columns = df.columns.tolist() # Convert columns to a list for proper manipulation
