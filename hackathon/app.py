@@ -39,14 +39,15 @@ async def upload_form():
 def display_parsed_pdfs(df):
     if df is not None:
         # Filter the dataframe based on the columns 
-        container = st.container()
-        all = st.checkbox("Select all")
-        if all:
-            selected_options = container.multiselect("Select one or more options:",
-                [value for value in df[1]],[value for value in df[1]])
-        else:
-            selected_options =  container.multiselect("Select one or more options:",
-            [value for value in df[1]])
+        columns = df.columns.tolist() # Convert columns to a list for proper manipulation
+        container = st.sidebar # Use the sidebar for user input
+        # Select columns to display
+        container.header("Select columns to display")
+        container.text(body="Filter out the columns for easy comparison")
+        selected_options = container.multiselect("Select one or more options:", columns)
+        all_options = st.sidebar.checkbox("Select all", value=True)
+        if all_options:
+            selected_options = columns # Select all columns if checkbox is ticked
 
         selected_columns = [column for column in columns if column in selected_options]
         df = df[selected_columns]
