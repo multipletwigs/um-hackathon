@@ -1,5 +1,5 @@
 import pypdf 
-from PyPDF2 import PdfReader
+from PyPDF2 import PdfReader, PdfWriter
 import os 
 import openai
 import json
@@ -7,8 +7,11 @@ import streamlit as st
 import pandas as pd
 import dbaccess
 import traceback
+from io import BytesIO, StringIO
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
 from fpdf import FPDF
-import aspose.words as aw
+import asyncio
 
 class Parser: 
   
@@ -106,13 +109,20 @@ class Parser:
       response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[body])
       content = response.choices[0].message.content
       
-      doc = aw.Document()      
-      builder = aw.DocumentBuilder(doc)
-
-      builder.writeln(content)
+      pdf = FPDF("P", "mm", "A4")
+ 
+      # Add a page
+      pdf.add_page()
       
-      doc.save("test.pdf")
+      # set style and size of font
+      # that you want in the pdf
+      pdf.set_font("Arial", size = 11)
       
+      # create a cell
+      pdf.multi_cell(0, 5, content, 0, 1)
+      
+      # save the pdf with name .pdf
+      pdf.output("test2.pdf") # TODO: Replace this  
       
     except:
       traceback.print_exc()
