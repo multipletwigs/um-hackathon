@@ -1,5 +1,5 @@
 import pypdf 
-from PyPDF2 import PdfReader, PdfWriter
+from PyPDF2 import PdfReader
 import os 
 import openai
 import json
@@ -7,11 +7,7 @@ import streamlit as st
 import pandas as pd
 import dbaccess
 import traceback
-from io import BytesIO, StringIO
-from reportlab.pdfgen import canvas
-from reportlab.lib.pagesizes import letter
 from fpdf import FPDF
-import asyncio
 
 class Parser: 
   
