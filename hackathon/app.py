@@ -80,3 +80,8 @@ if __name__ == "__main__":
     if 'parsed_pdfs' not in st.session_state and parsed_pdfs is not None:
         st.session_state['parsed_pdfs'] = parsed_pdfs 
     display_parsed_pdfs(st.session_state.get('parsed_pdfs'))
+
+    # Export the parsed pdfs to csv for download
+    if 'parsed_pdfs' in st.session_state:
+        st.download_button("Download CSV", data=st.session_state.get('parsed_pdfs').to_csv(), file_name="parsed_pdfs.csv", mime="text/csv")
+        
