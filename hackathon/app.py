@@ -48,15 +48,15 @@ def display_parsed_pdfs(parsed_pdfs):
 
 def display_parsed_pdfs(df):
     if df is not None:
-        # Filter the dataframe based on the columns 
-        container = st.container()
-        all = st.checkbox("Select all")
-        if all:
-            selected_options = container.multiselect("Select one or more options:",
-                [value for value in df[1]],[value for value in df[1]])
-        else:
-            selected_options =  container.multiselect("Select one or more options:",
-            [value for value in df[1]])
+        columns = df.columns.tolist() # Convert columns to a list for proper manipulation
+        container = st.sidebar # Use the sidebar for user input
+        # Select columns to display
+        container.header("Select columns to display")
+        container.text(body="Filter out the columns for easy comparison")
+        selected_options = container.multiselect("Select one or more options:", columns)
+        all_options = st.sidebar.checkbox("Select all", value=True)
+        if all_options:
+            selected_options = columns # Select all columns if checkbox is ticked
 
         selected_columns = [column for column in columns if column in selected_options]
         df = df[selected_columns]
@@ -76,16 +76,17 @@ def generate_memo(pdf):
     st.text(body=f"PDF: {pdf}")
     
     generator = memo.MemoGenerator()
-    memo = generator.generate_memo(pdf) 
-    for char in memo:
-        text += char
-        st.text(body=text)
 
-
+    if st.button("Generate Memo"):
+        memo = generator.generate_memo(pdf) 
+        for char in memo:
+            text += char
+            st.text(body=text)
 
 if __name__ == "__main__":
     st.set_page_config(layout="wide")
     introduction() 
     parsed_pdfs = asyncio.run(upload_form())
-    if parsed_pdfs is not None:
-        display_parsed_pdfs(parsed_pdfs)
+    if 'parsed_pdfs' not in st.session_state and parsed_pdfs is not None:
+        st.session_state['parsed_pdfs'] = parsed_pdfs 
+    display_parsed_pdfs(st.session_state.get('parsed_pdfs'))

@@ -29,8 +29,6 @@ class Parser:
       splits = s.split("|")
       json_format[splits[0]] = splits[1]
 
-    print(json_format)
-
     return json_format
 
   async def get_criterias(self):
