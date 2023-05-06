@@ -1,5 +1,5 @@
 import os 
-import environments
+import environment
 import openai
 class MemoGenerator:
     def __init__(self, memo):

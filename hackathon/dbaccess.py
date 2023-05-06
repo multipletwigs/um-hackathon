@@ -1,12 +1,21 @@
 import os
-import supabase
 from supabase import create_client, Client
-import environments
+import hashlib
+import time
+import environment
 
-def insert_table(pdf, problem, solution, business_model, market_analysis, market_size, team, competitive_landscape, competitive_advantage, category):
-    data, count = supabase.table('pitchdeck').insert(
+url = os.environ["SUPABASE_URL"]
+api_key = os.environ["SUPABASE_API_KEY"]
+supabase = create_client(url, api_key)
+
+def insert_table(problem, solution, business_model, market_analysis, market_size, team, competitive_landscape, competitive_advantage, category, filehash):
+    url = os.environ["SUPABASE_URL"]
+    api_key = os.environ["SUPABASE_API_KEY"]
+
+    client = create_client(url, api_key)
+    
+    response = client.table('pitchdeck').insert(
         {
-            "pitch_pdf": pdf,
             "pitch_problem": problem,
             "pitch_solution": solution,
             "pitch_business_model": business_model,
@@ -15,19 +24,55 @@ def insert_table(pdf, problem, solution, business_model, market_analysis, market
             "pitch_team": team,
             "pitch_competitive_landscape": competitive_landscape,
             "pitch_competitive_advantage": competitive_advantage,
-            "pitch_category": category
+            "pitch_category": category,
+            "pitch_filehash": filehash
         }).execute()
+    
+    return response
+    
 
 def get_table():
-    return supabase.table('pitchdeck').select("*").execute()
-
-if __name__ == "__main__":
     url = os.environ["SUPABASE_URL"]
     api_key = os.environ["SUPABASE_API_KEY"]
 
-    supabase = create_client(url, api_key)
+    client = create_client(url, api_key)
+    
+    return client.table('pitchdeck').select("*").execute()
 
-    # insert_table("123", "2", "123", "123", "123", "123", "123", "123", "123", "123")
+def get_row_by_hash(filehash):
+    url = os.environ["SUPABASE_URL"]
+    api_key = os.environ["SUPABASE_API_KEY"]
 
-    print(get_table())
+    client = create_client(url, api_key)
+    
+    return client.table("pitchdeck").select("*").eq("pitch_filehash", filehash).execute()
+    
 
+def hash_file(filename):
+    BUF_SIZE = 65536
+    
+    sha256 = hashlib.sha256()
+    
+    with open(filename, "rb") as file:
+        while True:
+            data = file.read(BUF_SIZE)
+            
+            if not data:
+                break
+            
+            sha256.update(data)
+            
+    return sha256.hexdigest()
+
+def hash_file_bytes(filebyte):
+    BUF_SIZE = 65536
+    
+    sha256 = hashlib.sha256()
+    
+    while True:
+        data = filebyte.read(BUF_SIZE)
+        if not data:
+            break
+        sha256.update(data)     
+    return sha256.hexdigest()
+            

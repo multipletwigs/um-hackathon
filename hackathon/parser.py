@@ -2,7 +2,7 @@ import pypdf
 from PyPDF2 import PdfReader
 import os 
 import openai
-import environments 
+import environment
 import json
 import pandas as pd
 
