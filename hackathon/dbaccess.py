@@ -7,8 +7,10 @@ url = os.environ["SUPABASE_URL"] if os.environ["SUPABASE_URL"] is not None else 
 api_key = os.environ["SUPABASE_API_KEY"] if os.environ["SUPABASE_API_KEY"] is not None else st.secrets["SUPABASE_API_KEY"]
 supabase = create_client(url, api_key)
 
-def insert_table(problem, solution, business_model, market_analysis, market_size, team, competitive_landscape, competitive_advantage, category, filehash):
-    client = create_client(url, api_key) 
+
+def insert_table(problem, solution, business_model, market_analysis, market_size, team, competitive_landscape, competitive_advantage, category, filehash, product):
+    client = create_client(url, api_key)
+    
     response = client.table('pitchdeck').insert(
         {
             "pitch_problem": problem,
@@ -20,7 +22,8 @@ def insert_table(problem, solution, business_model, market_analysis, market_size
             "pitch_competitive_landscape": competitive_landscape,
             "pitch_competitive_advantage": competitive_advantage,
             "pitch_category": category,
-            "pitch_filehash": filehash
+            "pitch_filehash": filehash,
+            "pitch_product": product
         }).execute()
     
     return response
@@ -55,4 +58,3 @@ def hash_file_bytes(filebyte):
             break
         sha256.update(data)     
     return sha256.hexdigest()
-            
