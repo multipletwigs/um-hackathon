@@ -8,7 +8,7 @@ url = os.environ["SUPABASE_URL"]
 api_key = os.environ["SUPABASE_API_KEY"]
 supabase = create_client(url, api_key)
 
-def insert_table(problem, solution, business_model, market_analysis, market_size, team, competitive_landscape, competitive_advantage, category, filehash):
+def insert_table(problem, solution, business_model, market_analysis, market_size, team, competitive_landscape, competitive_advantage, category, filehash, product):
     url = os.environ["SUPABASE_URL"]
     api_key = os.environ["SUPABASE_API_KEY"]
 
@@ -25,7 +25,8 @@ def insert_table(problem, solution, business_model, market_analysis, market_size
             "pitch_competitive_landscape": competitive_landscape,
             "pitch_competitive_advantage": competitive_advantage,
             "pitch_category": category,
-            "pitch_filehash": filehash
+            "pitch_filehash": filehash,
+            "pitch_product": product
         }).execute()
     
     return response
@@ -75,4 +76,3 @@ def hash_file_bytes(filebyte):
             break
         sha256.update(data)     
     return sha256.hexdigest()
-            
