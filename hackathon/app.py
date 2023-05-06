@@ -37,6 +37,7 @@ async def upload_form():
         return pd.concat(parsed_pdfs, ignore_index=True)
 
 def display_parsed_pdfs(df):
+    product_sidebar_df = df
     if df is not None:
         columns = df.columns.tolist() # Convert columns to a list for proper manipulation
         container = st.sidebar # Use the sidebar for user input
@@ -51,6 +52,20 @@ def display_parsed_pdfs(df):
         selected_columns = [column for column in columns if column in selected_options]
         df = df[selected_columns]
         st.table(df)
+
+        container.header("Select product to generate memo")
+        # container.text(body="Choose the company you want to generate a memo for")
+        list_of_products = product_sidebar_df['Product Name'].tolist()
+        selected_product = container.multiselect("Select one or more options:", list_of_products)
+        select_all_companies = st.sidebar.checkbox("Select all Products", value=True)
+        if select_all_companies:
+            selected_product = list_of_products # Select all columns if checkbox is ticked
+
+        selected_product = [product for product in list_of_products if product in selected_options]
+        memo_df = product_sidebar_df[selected_product]
+        container.button("Download Memo")
+        # generate_memo(memo_df)
+        # if container.button("Download Memo"):
 
 def dropdown_pdf(parsed_pdfs):
     # Create a dropdown for the pdfs
