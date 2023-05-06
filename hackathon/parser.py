@@ -2,15 +2,17 @@ import pypdf
 from PyPDF2 import PdfReader
 import os 
 import openai
-import environment
 import json
+import streamlit as st
 import pandas as pd
 import dbaccess
+import traceback
 
 class Parser: 
   
   def __init__(self, filebytes): 
     self.file_bytes = filebytes
+    self.OPENAI_API = os.environ['OPENAI_API'] if os.environ['OPENAI_API'] else st.secrets['OPENAI_API']
 
   def _parse(self):
     # Parse all text content from the pdf file by page
@@ -28,12 +30,11 @@ class Parser:
     json_format = {}
     for s in strs:
       splits = s.split("|")
-      json_format[splits[0]] = splits[1]
-
+      json_format[splits[0].strip()] = splits[1]
+      
     return json_format
 
   async def get_criterias(self):
-    
     filehash = dbaccess.hash_file_bytes(self.file_bytes)
     row = dbaccess.get_row_by_hash(filehash)
     
@@ -52,11 +53,12 @@ class Parser:
           "content": f"Generate a summary of the pitch deck document based on the following criterias: {criterias}. The content of the document is as follows: {content}. \nPlease generate the text in the following format. <Criteria> | <Summary> \n" 
         }
 
+
         response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[body])
         json_format = self._parse_to_json(response.choices[0].message.content)
         
         dbaccess.insert_table(
-          problem=json_format["Product Name"],
+          problem=json_format["Problem Statement"],
           solution=json_format["Solution"],
           business_model=json_format["Business Model"],
           market_analysis=json_format["Market Analysis"],
@@ -73,6 +75,7 @@ class Parser:
         return json_format 
 
       except Exception as e:
+        traceback.print_exc()
         print(f"Error: {e}")
       
     else:
@@ -80,8 +83,7 @@ class Parser:
       
       row_data = row.data[0]
       
-      return json.dumps(
-        {
+      return {
           "Product Name": row_data["pitch_product"],
           "Category": row_data["pitch_category"],
           "Problem Statement": row_data["pitch_problem"],
@@ -89,11 +91,8 @@ class Parser:
           "Business Model": row_data["pitch_business_model"],
           "Market Analysis": row_data["pitch_market_analysis"],
           "Team": row_data["pitch_team"]
-        },
-        indent=4
-      )
+        }
       
-
   def json_to_df(self, json_response):
     # Parse the json response to a dataframe
     # Get keys from json response
