@@ -2,6 +2,12 @@ import os
 from supabase import create_client, Client
 import hashlib
 import time
+import streamlit as st
+
+try:
+    import environment
+except:
+    pass
 
 url = os.environ["SUPABASE_URL"] if os.environ["SUPABASE_URL"] is not None else st.secrets["SUPABASE_URL"]
 api_key = os.environ["SUPABASE_API_KEY"] if os.environ["SUPABASE_API_KEY"] is not None else st.secrets["SUPABASE_API_KEY"]
