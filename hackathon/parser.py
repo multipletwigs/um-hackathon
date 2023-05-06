@@ -7,6 +7,8 @@ import streamlit as st
 import pandas as pd
 import dbaccess
 import traceback
+from fpdf import FPDF
+import aspose.words as aw
 
 class Parser: 
   
@@ -92,6 +94,28 @@ class Parser:
           "Market Analysis": row_data["pitch_market_analysis"],
           "Team": row_data["pitch_team"]
         }
+
+  def investment_memo(self, vc_company, json_response):
+    try:
+      openai.api_key = os.environ['OPENAI_API']
+      body = {
+        "role": "user",
+        "content": f"Generate an investment memo that is from {vc_company} for this this company based on the given information \n\n{json.dumps(json_response)}" 
+      }
+      
+      response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[body])
+      content = response.choices[0].message.content
+      
+      doc = aw.Document()      
+      builder = aw.DocumentBuilder(doc)
+
+      builder.writeln(content)
+      
+      doc.save("test.pdf")
+      
+      
+    except:
+      traceback.print_exc()
       
   def json_to_df(self, json_response):
     # Parse the json response to a dataframe
@@ -112,6 +136,4 @@ if __name__ == "__main__":
   parser._parse()
   # parser.get_criterias()
 
-
-
-
+  parser.investment_memo("Ignite Asia", json.dumps({'id': 6, 'created_at': '2023-05-06T07:48:14.939942+00:00', 'pitch_problem': " Price is a concern for customers booking travel online and hotels don't offer a local connection to the city. There is no easy way to book a room with a local or become a host. ", 'pitch_solution': ' AirBed & Breakfast is a web platform where users can rent out their space to host travelers, providing a way to save money when traveling, make money when hosting and share the local culture. ', 'pitch_business_model': ' AirBed & Breakfast takes a 10% commission on each transaction. ', 'pitch_market_analysis': ' There were over 46,000 listings on temporary housing site couchsurfing.com and 17,000 temporary housing listings on SF & NYC Craigslist in the time period of 07/09 to 07/16. The available market size was valued at $51.9 billion, with a serviceable market of 10.6 million trips. ', 'pitch_market_size': 'N/A', 'pitch_team': ' No information provided.', 'pitch_competitive_landscape': 'N/A', 'pitch_competitive_advantage': 'N/A', 'pitch_category': ' Travel/ Accommodation ', 'pitch_filehash': 'c291ca07570a81536e5aec09b61877b38414dd8ee7fbe3ea11c010a1032513ce', 'pitch_product': ' AirBed & Breakfast '}))
