@@ -3,4 +3,4 @@ etc
 lib
 include
 share
-hackathon/environments
+hackathon/environments.py

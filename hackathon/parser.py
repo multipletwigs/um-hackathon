@@ -1,4 +1,5 @@
 import pypdf 
+from PyPDF2 import PdfReader
 import os 
 import openai
 import environments 
@@ -12,10 +13,12 @@ class Parser:
 
   def _parse(self):
     # Parse all text content from the pdf file by page
-    pdf = pypdf.PdfReader(self.file_bytes)
+    pdf = PdfReader(self.file_bytes)
     content = []
     for page in pdf.pages:
+      print(page)
       content.append([page.extract_text()])
+    print(content)
     return content
 
   async def get_criterias(self):
@@ -29,13 +32,16 @@ class Parser:
       openai.api_key = os.environ['OPENAI_API']
       body = {
         "role": "user",
-        "content": f"Generate a summary of the document based on the following criterias: {criterias}. The content of the document is as follows: {content}. \nPlease generate the text in JSON format where the value of the content is a summary" 
+        "content": f"Generate a summary of the document based on the following criterias: {criterias}. The content of the document is as follows: {content}. \nPlease generate the text in JSON format where the property names are in double quotes and the value is a summary." 
       }
 
       response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[body])
 
+      json_format = json.loads(response.choices[0].message.content)
+      print(json_format) 
+
       # Parse the response to a json format
-      return json.loads(response.choices[0].message.content)
+      return json_format 
 
     except Exception as e:
       print(f"Error: {e}")
@@ -55,8 +61,9 @@ class Parser:
     return df
       
 if __name__ == "__main__":
-  parser = Parser("airbnb_pitch.pdf")
-  parser.get_criterias()
+  parser = Parser("hackathon/pitch_decks/youtube pitch deck (1).pdf")
+  parser._parse()
+  # parser.get_criterias()
 
 
 
