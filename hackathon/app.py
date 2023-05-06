@@ -1,9 +1,12 @@
 import streamlit as st 
+import torch as torch
+from st_aggrid import AgGrid
 import pandas as pd
 import io
 import asyncio 
 from parser import Parser
 from st_aggrid import AgGrid
+
 
 def introduction():
     st.title("Upload PDF Pitch Decks")
@@ -33,21 +36,26 @@ async def upload_form():
         temp = parsed_pdfs 
         return pd.concat(parsed_pdfs, ignore_index=True)
 
-    if temp is not None:
-        return pd.concat(temp, ignore_index=True)
+def display_parsed_pdfs(parsed_pdfs):
+    # Display the parsed pdfs
+    df = None 
+    for parsed_pdf in parsed_pdfs:
+        if df is None:
+            df = pd.DataFrame(parsed_pdf)
+        else:
+            df = df.append(parsed_pdf, ignore_index=True)
 
 def display_parsed_pdfs(df):
     if df is not None:
         # Filter the dataframe based on the columns 
-        columns = df.columns.tolist() # Convert columns to a list for proper manipulation
-        container = st.sidebar # Use the sidebar for user input
-        # Select columns to display
-        container.header("Select columns to display")
-        container.text(body="Filter out the columns for easy comparison")
-        selected_options = container.multiselect("Select one or more options:", columns)
-        all_options = st.sidebar.checkbox("Select all", value=True)
-        if all_options:
-            selected_options = columns # Select all columns if checkbox is ticked
+        container = st.container()
+        all = st.checkbox("Select all")
+        if all:
+            selected_options = container.multiselect("Select one or more options:",
+                [value for value in df[1]],[value for value in df[1]])
+        else:
+            selected_options =  container.multiselect("Select one or more options:",
+            [value for value in df[1]])
 
         selected_columns = [column for column in columns if column in selected_options]
         df = df[selected_columns]
@@ -57,6 +65,5 @@ if __name__ == "__main__":
     st.set_page_config(layout="wide")
     introduction() 
     parsed_pdfs = asyncio.run(upload_form())
-    if 'parsed_pdfs' not in st.session_state and parsed_pdfs is not None:
-        st.session_state['parsed_pdfs'] = parsed_pdfs 
-    display_parsed_pdfs(st.session_state.get('parsed_pdfs'))
+    if parsed_pdfs is not None:
+        display_parsed_pdfs(parsed_pdfs)
