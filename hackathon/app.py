@@ -4,6 +4,7 @@ from st_aggrid import AgGrid
 import pandas as pd
 import io
 import asyncio 
+import memo
 from parser import Parser
 from st_aggrid import AgGrid
 
@@ -60,6 +61,27 @@ def display_parsed_pdfs(df):
         selected_columns = [column for column in columns if column in selected_options]
         df = df[selected_columns]
         st.table(df)
+
+def dropdown_pdf(parsed_pdfs):
+    # Create a dropdown for the pdfs
+    pdfs = [f"PDF {parsed_pdfs[i]['Product Name']}" for i in range(0, len(parsed_pdfs))]
+    pdf = st.selectbox("Select a PDF", pdfs)
+    return pdf
+
+def generate_memo(pdf):
+    text = ""
+    # Generate a memo based on the selected pdf
+    st.header("Memo")
+    st.text(body=f"Based on the selected PDF, the following is a memo of the pitch deck.")
+    st.text(body=f"PDF: {pdf}")
+    
+    generator = memo.MemoGenerator()
+    memo = generator.generate_memo(pdf) 
+    for char in memo:
+        text += char
+        st.text(body=text)
+
+
 
 if __name__ == "__main__":
     st.set_page_config(layout="wide")

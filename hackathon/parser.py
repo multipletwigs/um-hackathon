@@ -16,10 +16,22 @@ class Parser:
     pdf = PdfReader(self.file_bytes)
     content = []
     for page in pdf.pages:
-      print(page)
       content.append([page.extract_text()])
-    print(content)
     return content
+  
+  def _parse_to_json(self, text):
+    # Split by newline 
+    strs = text.split("\n") 
+
+    # For each string, split by colon
+    json_format = {}
+    for s in strs:
+      splits = s.split("|")
+      json_format[splits[0]] = splits[1]
+
+    print(json_format)
+
+    return json_format
 
   async def get_criterias(self):
 
@@ -32,13 +44,11 @@ class Parser:
       openai.api_key = os.environ['OPENAI_API']
       body = {
         "role": "user",
-        "content": f"Generate a summary of the document based on the following criterias: {criterias}. The content of the document is as follows: {content}. \nPlease generate the text in JSON format where the property names are in double quotes and the value is a summary." 
+        "content": f"Generate a summary of the pitch deck document based on the following criterias: {criterias}. The content of the document is as follows: {content}. \nPlease generate the text in the following format. <Criteria> | <Summary> \n" 
       }
 
       response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=[body])
-
-      json_format = json.loads(response.choices[0].message.content)
-      print(json_format) 
+      json_format = self._parse_to_json(response.choices[0].message.content)
 
       # Parse the response to a json format
       return json_format 
