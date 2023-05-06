@@ -1,4 +1,4 @@
-# UM Hackathon 2023 - Team it is what it is
+# UM Hackathon 2023 - Team it is what it is | PitchSync
 This README provides instructions on how to run a Streamlit app, which is what powers our application PitchSync. Along with the steps to set up a virtual environment and install all the required dependencies from a `requirements.txt` file.
 
 ## Prerequisites
@@ -34,5 +34,6 @@ This README provides instructions on how to run a Streamlit app, which is what p
    ```shell
    streamlit run app.py
    ``` 
+6. `NLP_similarity_check.ipynb` is a simple small evaluation metric against ai generated content and human compiled content from pitchdecks.   
 
 
