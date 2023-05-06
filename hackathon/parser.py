@@ -8,6 +8,8 @@ import pandas as pd
 import dbaccess
 import traceback
 from fpdf import FPDF
+import zlib
+import zipfile
 
 class Parser: 
   
@@ -92,9 +94,23 @@ class Parser:
           "Business Model": row_data["pitch_business_model"],
           "Market Analysis": row_data["pitch_market_analysis"],
           "Team": row_data["pitch_team"]
-        }
+        }  
+      
+  def json_to_df(self, json_response):
+    # Parse the json response to a dataframe
+    # Get keys from json response
+    keys = json_response.keys() 
+    
+    # Extract values from json response
+    values = []
+    for key in keys:
+      values.append(json_response[key])
 
-  def investment_memo(self, vc_company, json_response):
+    # Create a dataframe from the keys and values, where the keys are columns
+    df = pd.DataFrame(values, index=keys).transpose()
+    return df
+  
+def investment_memo(vc_company, json_response, output_file):
     try:
       openai.api_key = os.environ['OPENAI_API']
       body = {
@@ -115,31 +131,52 @@ class Parser:
       pdf.set_font("Arial", size = 11)
       
       # create a cell
-      pdf.multi_cell(0, 5, content, 0, 1)
+      pdf.multi_cell(0, 5, content, 0, "L")
       
-      # save the pdf with name .pdf
-      pdf.output("test2.pdf") # TODO: Replace this  
+      print(content)
       
+      try:
+        # save the pdf with name .pdf
+        pdf.output(output_file)  
+      except:
+        pass  
+      
+
     except:
       traceback.print_exc()
       
-  def json_to_df(self, json_response):
-    # Parse the json response to a dataframe
-    # Get keys from json response
-    keys = json_response.keys() 
-    
-    # Extract values from json response
-    values = []
-    for key in keys:
-      values.append(json_response[key])
+      
+def investment_memo_batch(json_responses):
+    path = "pdf_batch/"
 
-    # Create a dataframe from the keys and values, where the keys are columns
-    df = pd.DataFrame(values, index=keys).transpose()
-    return df
+    # Select the compression mode ZIP_DEFLATED for compression
+    # or zipfile.ZIP_STORED to just store the file
+    compression = zipfile.ZIP_DEFLATED
+    
+    zip_file_name = "RAWs.zip"
+
+    # create the zip file first parameter path/name, second mode
+    zf = zipfile.ZipFile(zip_file_name, mode="w")
+    try:
+        counter = 0
+        for json_response in json_responses:
+            investment_memo("Ignite Asia", json_response, f"{path}{counter}.pdf")
+            # Add file to the zip file
+            # first parameter file to zip, second filename in zip
+            zf.write(f"{path}{counter}.pdf", f"{counter}.pdf", compress_type=compression)
+            counter += 1
+
+    except FileNotFoundError:
+        print("An error occurred")
+    finally:
+        # Don't forget to close the file!
+        zf.close()  
+
+
       
 if __name__ == "__main__":
   parser = Parser("hackathon/pitch_decks/youtube pitch deck (1).pdf")
   parser._parse()
   # parser.get_criterias()
 
-  parser.investment_memo("Ignite Asia", json.dumps({'id': 6, 'created_at': '2023-05-06T07:48:14.939942+00:00', 'pitch_problem': " Price is a concern for customers booking travel online and hotels don't offer a local connection to the city. There is no easy way to book a room with a local or become a host. ", 'pitch_solution': ' AirBed & Breakfast is a web platform where users can rent out their space to host travelers, providing a way to save money when traveling, make money when hosting and share the local culture. ', 'pitch_business_model': ' AirBed & Breakfast takes a 10% commission on each transaction. ', 'pitch_market_analysis': ' There were over 46,000 listings on temporary housing site couchsurfing.com and 17,000 temporary housing listings on SF & NYC Craigslist in the time period of 07/09 to 07/16. The available market size was valued at $51.9 billion, with a serviceable market of 10.6 million trips. ', 'pitch_market_size': 'N/A', 'pitch_team': ' No information provided.', 'pitch_competitive_landscape': 'N/A', 'pitch_competitive_advantage': 'N/A', 'pitch_category': ' Travel/ Accommodation ', 'pitch_filehash': 'c291ca07570a81536e5aec09b61877b38414dd8ee7fbe3ea11c010a1032513ce', 'pitch_product': ' AirBed & Breakfast '}))
+  investment_memo_batch([json.dumps({'id': 6, 'created_at': '2023-05-06T07:48:14.939942+00:00', 'pitch_problem': " Price is a concern for customers booking travel online and hotels don't offer a local connection to the city. There is no easy way to book a room with a local or become a host. ", 'pitch_solution': ' AirBed & Breakfast is a web platform where users can rent out their space to host travelers, providing a way to save money when traveling, make money when hosting and share the local culture. ', 'pitch_business_model': ' AirBed & Breakfast takes a 10% commission on each transaction. ', 'pitch_market_analysis': ' There were over 46,000 listings on temporary housing site couchsurfing.com and 17,000 temporary housing listings on SF & NYC Craigslist in the time period of 07/09 to 07/16. The available market size was valued at $51.9 billion, with a serviceable market of 10.6 million trips. ', 'pitch_market_size': 'N/A', 'pitch_team': ' No information provided.', 'pitch_competitive_landscape': 'N/A', 'pitch_competitive_advantage': 'N/A', 'pitch_category': ' Travel/ Accommodation ', 'pitch_filehash': 'c291ca07570a81536e5aec09b61877b38414dd8ee7fbe3ea11c010a1032513ce', 'pitch_product': ' AirBed & Breakfast '})])

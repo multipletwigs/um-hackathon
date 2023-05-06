@@ -4,8 +4,9 @@ from st_aggrid import AgGrid
 import pandas as pd
 import io
 import asyncio 
-
+import json
 from parser import Parser
+import parser as par
 from st_aggrid import AgGrid
 
 
@@ -50,8 +51,8 @@ def display_parsed_pdfs(df):
             selected_options = columns # Select all columns if checkbox is ticked
 
         selected_columns = [column for column in columns if column in selected_options]
-        df = df[selected_columns]
-        st.table(df)
+        df1 = df[selected_columns]
+        st.table(df1)
 
         container.header("Select product to generate memo")
         # container.text(body="Choose the company you want to generate a memo for")
@@ -61,11 +62,22 @@ def display_parsed_pdfs(df):
         if select_all_companies:
             selected_product = list_of_products # Select all columns if checkbox is ticked
 
-        selected_product = [product for product in list_of_products if product in selected_options]
-        memo_df = product_sidebar_df[selected_product]
-        container.button("Download Memo")
+        selected_rows = [product for product in list_of_products if product in selected_product]
+        # st.table(selected_rows)
+        memo_df = product_sidebar_df[product_sidebar_df["Product Name"].isin(selected_rows)]
+        st.table(memo_df)
+        # container.button("Download Memo")
+        
         # generate_memo(memo_df)
         # if container.button("Download Memo"):
+        #     print(json.dumps(memo_df.to_json()[1:-1].replace('},{', '} {')))
+            # container.download_button(
+            #     "Download Memo",
+            #     data=par.investment_memo_batch(json.dumps(memo_df.to_json)), # TODO: i need the list of json response in here
+            #     file_name="RAWs.zip",
+            #     mime="application/zip"
+            # )
+            
 
 def dropdown_pdf(parsed_pdfs):
     # Create a dropdown for the pdfs
