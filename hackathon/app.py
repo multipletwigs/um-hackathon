@@ -43,8 +43,7 @@ def display_parsed_pdfs(df):
         columns = df.columns.tolist() # Convert columns to a list for proper manipulation
         container = st.sidebar # Use the sidebar for user input
         # Select columns to display
-        container.header("Select columns to display")
-        container.text(body="Filter out the columns for easy comparison")
+        container.header("Filter by columns")
         selected_options = container.multiselect("Select one or more options:", columns)
         all_options = st.sidebar.checkbox("Select all", value=True)
         if all_options:
@@ -54,7 +53,7 @@ def display_parsed_pdfs(df):
         df1 = df[selected_columns]
         st.table(df1)
 
-        container.header("Select product to generate memo")
+        container.header("Filter by product")
         # container.text(body="Choose the company you want to generate a memo for")
         list_of_products = product_sidebar_df['Product Name'].tolist()
         selected_product = container.multiselect("Select one or more options:", list_of_products)
